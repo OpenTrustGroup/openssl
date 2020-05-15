@@ -12,10 +12,25 @@ import("//build/sdk/sdk_atom.gni")
 ################################################################################
 # Public targets
 
-group("crypto") {
-  public_configs = [
-    ":crypto_config",
+config("openssl_config") {
+  include_dirs = [
+    "//third_party/openssl/include",
+    "//out/build-openssl/include",
   ]
+  defines = [
+  ]
+}
+
+static_library("libopenssl_crypto") {
+  lib_dirs = [
+    "//out/build-openssl"
+  ]
+
+  libs = [
+    "openssl_static_crypto",   # libcrypto.a
+  ]
+
+  public_configs = [ ":openssl_config" ]
 }
 
 ################################################################################
@@ -57,6 +72,11 @@ sdk_atom("openssl_sdk") {
       dest = "include/openssl/$f" } ]
   }
 
+  files += [ {
+    source = "//out/build-openssl/include/openssl/opensslconf.h"
+    dest = "include/openssl/opensslconf.h" } 
+  ]
+
   # copy libraries.
   files += [
     #{
@@ -70,6 +90,6 @@ sdk_atom("openssl_sdk") {
   ]
 
   non_sdk_deps = [
-    ":crypto",
+    ":libopenssl_crypto",
   ]
 }
