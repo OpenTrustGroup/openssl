@@ -1,0 +1,75 @@
+# Copyright 2017 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/package.gni")
+import("//build/sdk/sdk_atom.gni")
+
+# GRT(TODO):
+# 1. miss libssl.
+# 2. don't add method add the libcrypto.so to HEE image.
+
+################################################################################
+# Public targets
+
+group("crypto") {
+  public_configs = [
+    ":crypto_config",
+  ]
+}
+
+################################################################################
+# Configs
+config("crypto_config") {
+  include_dirs = [
+    "//third_party/openssl/include",
+    "//out/build-openssl/include",
+  ]
+
+  libs = ["//out/build-openssl/libopenssl_crypto.so"]
+
+  visibility = [
+    ":*",
+  ]
+}
+
+###########################################################
+## SDK
+
+sdk_atom("openssl_sdk") {
+  domain = "cpp"
+  name = "openssl"
+
+  tags = [
+    "type:compiled_shared",
+    "arch:target"
+  ]
+
+  output_category = "hee/openssl"
+
+  files = []
+
+  # copy all head files into sdk.
+  all_files = exec_script("//build/sdk/list_files.sh", [rebase_path("./include/openssl", root_build_dir)], "list lines")
+  foreach(f, all_files) {
+    files += [ {
+      source = "include/openssl/$f"
+      dest = "include/openssl/$f" } ]
+  }
+
+  # copy libraries.
+  files += [
+    #{
+    #  source = "//out/build-openssl/libopenssl_crypto.so"
+    #  dest = "lib/libopenssl_crypto.so"
+    #}
+    {
+      source = "//out/build-openssl/libcrypto.a"
+      dest = "lib/libopenssl_crypto.a"
+    }
+  ]
+
+  non_sdk_deps = [
+    ":crypto",
+  ]
+}
