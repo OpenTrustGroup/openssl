@@ -65,16 +65,16 @@ sdk_atom("openssl_sdk") {
   files = []
 
   # copy all head files into sdk.
-  all_files = exec_script("//build/sdk/list_files.sh", [rebase_path("./include/openssl", root_build_dir)], "list lines")
+  all_files = exec_script("//build/sdk/list_files.sh", [rebase_path("./include", root_build_dir)], "list lines")
   foreach(f, all_files) {
     files += [ {
-      source = "include/openssl/$f"
-      dest = "include/openssl/$f" } ]
+      source = "include/$f"
+      dest = "include/$f" } ]
   }
 
   files += [ {
     source = "//out/build-openssl/include/openssl/opensslconf.h"
-    dest = "include/openssl/opensslconf.h" } 
+    dest = "include/openssl/opensslconf.h" }
   ]
 
   # copy libraries.
