@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/package.gni")
-import("//build/sdk/sdk_atom.gni")
+import("//build/nebula/nbl_sdk_library.gni")
 
 # GRT(TODO):
 # 1. miss libssl.
@@ -51,45 +51,21 @@ config("crypto_config") {
 ###########################################################
 ## SDK
 
-sdk_atom("openssl_sdk") {
-  domain = "cpp"
+nbl_sdk_library("openssl_sdk") {
   name = "openssl"
-
-  tags = [
-    "type:compiled_shared",
-    "arch:target"
+  category = "hee"
+  hdr_dir = "include"
+  deps = [
+    ":libopenssl_crypto",
   ]
-
-  output_category = "hee/openssl"
-
-  files = []
-
-  # copy all head files into sdk.
-  all_files = exec_script("//build/sdk/list_files.sh", [rebase_path("./include", root_build_dir)], "list lines")
-  foreach(f, all_files) {
-    files += [ {
-      source = "include/$f"
-      dest = "include/$f" } ]
-  }
-
-  files += [ {
-    source = "//out/build-openssl/include/openssl/opensslconf.h"
-    dest = "include/openssl/opensslconf.h" }
-  ]
-
-  # copy libraries.
-  files += [
-    #{
-    #  source = "//out/build-openssl/libopenssl_crypto.so"
-    #  dest = "lib/libopenssl_crypto.so"
-    #}
+  files = [
+    {
+      source = "//out/build-openssl/include/openssl/opensslconf.h"
+      dest = "include/openssl/opensslconf.h"
+    },
     {
       source = "//out/build-openssl/libcrypto.a"
       dest = "lib/libopenssl_crypto.a"
-    }
-  ]
-
-  non_sdk_deps = [
-    ":libopenssl_crypto",
+    },
   ]
 }
