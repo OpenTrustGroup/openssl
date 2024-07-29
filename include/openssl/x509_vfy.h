@@ -185,6 +185,28 @@ void X509_STORE_CTX_set_depth(X509_STORE_CTX *ctx, int depth);
 # define         X509_V_ERR_OCSP_VERIFY_FAILED                   74  /* Couldn't verify cert through OCSP */
 # define         X509_V_ERR_OCSP_CERT_UNKNOWN                    75  /* Certificate wasn't recognized by the OCSP responder */
 
+# define X509_V_ERR_UNSUPPORTED_SIGNATURE_ALGORITHM      76
+# define X509_V_ERR_SIGNATURE_ALGORITHM_MISMATCH         77
+
+/* Errors in case a check in X509_V_FLAG_X509_STRICT mode fails */
+# define X509_V_ERR_SIGNATURE_ALGORITHM_INCONSISTENCY    78
+# define X509_V_ERR_PATHLEN_INVALID_FOR_NON_CA           80
+# define X509_V_ERR_PATHLEN_WITHOUT_KU_KEY_CERT_SIGN     81
+# define X509_V_ERR_KU_KEY_CERT_SIGN_INVALID_FOR_NON_CA  82
+# define X509_V_ERR_ISSUER_NAME_EMPTY                    83
+# define X509_V_ERR_SUBJECT_NAME_EMPTY                   84
+# define X509_V_ERR_MISSING_AUTHORITY_KEY_IDENTIFIER     85
+# define X509_V_ERR_MISSING_SUBJECT_KEY_IDENTIFIER       86
+# define X509_V_ERR_EMPTY_SUBJECT_ALT_NAME               87
+# define X509_V_ERR_EMPTY_SUBJECT_SAN_NOT_CRITICAL       88
+# define X509_V_ERR_CA_BCONS_NOT_CRITICAL                89
+# define X509_V_ERR_AUTHORITY_KEY_IDENTIFIER_CRITICAL    90
+# define X509_V_ERR_SUBJECT_KEY_IDENTIFIER_CRITICAL      91
+# define X509_V_ERR_CA_CERT_MISSING_KEY_USAGE            92
+# define X509_V_ERR_EXTENSIONS_REQUIRE_VERSION_3         93
+# define X509_V_ERR_EC_KEY_EXPLICIT_PARAMS               94
+# define X509_V_ERR_RPK_UNTRUSTED                        95
+
 /* Certificate verify flags */
 
 # if OPENSSL_API_COMPAT < 0x10100000L

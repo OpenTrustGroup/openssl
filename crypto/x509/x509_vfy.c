@@ -80,6 +80,7 @@ static int get_issuer_sk(X509 **issuer, X509_STORE_CTX *ctx, X509 *x);
 static int check_dane_issuer(X509_STORE_CTX *ctx, int depth);
 static int check_key_level(X509_STORE_CTX *ctx, X509 *cert);
 static int check_sig_level(X509_STORE_CTX *ctx, X509 *cert);
+static int check_curve(X509 *cert);
 
 static int get_crl_score(X509_STORE_CTX *ctx, X509 **pissuer,
                          unsigned int *preasons, X509_CRL *crl, X509 *x);
@@ -508,12 +509,26 @@ static int check_chain_extensions(X509_STORE_CTX *ctx)
                 ret = 1;
             break;
         }
-        if ((x->ex_flags & EXFLAG_CA) == 0
+
+        if (ret > 0
+            && (ctx->param->flags & X509_V_FLAG_X509_STRICT) && num > 1) {
+            /* Check for presence of explicit elliptic curve parameters */
+            ret = check_curve(x);
+            if (ret < 0) {
+                ctx->error = X509_V_ERR_UNSPECIFIED;
+            } else if (ret == 0) {
+                ctx->error = X509_V_ERR_EC_KEY_EXPLICIT_PARAMS;
+            }
+        }
+
+        if (ret > 0
+            && (x->ex_flags & EXFLAG_CA) == 0
             && x->ex_pathlen != -1
             && (ctx->param->flags & X509_V_FLAG_X509_STRICT)) {
             ctx->error = X509_V_ERR_INVALID_EXTENSION;
             ret = 0;
         }
+
         if (ret == 0 && !verify_cb_cert(ctx, x, i, X509_V_OK))
             return 0;
         /* check_purpose() makes the callback as needed */
@@ -1621,18 +1636,25 @@ static int check_policy(X509_STORE_CTX *ctx)
     }
     /* Invalid or inconsistent extensions */
     if (ret == X509_PCY_TREE_INVALID) {
-        int i;
+        int i, cbcalled = 0;
 
         /* Locate certificates with bad extensions and notify callback. */
-        for (i = 1; i < sk_X509_num(ctx->chain); i++) {
+        for (i = 0; i < sk_X509_num(ctx->chain); i++) {
             X509 *x = sk_X509_value(ctx->chain, i);
 
             if (!(x->ex_flags & EXFLAG_INVALID_POLICY))
                 continue;
+            cbcalled = 1;
             if (!verify_cb_cert(ctx, x, i,
                                 X509_V_ERR_INVALID_POLICY_EXTENSION))
                 return 0;
         }
+        if (!cbcalled) {
+            /* Should not be able to get here */
+            X509err(X509_F_CHECK_POLICY, ERR_R_INTERNAL_ERROR);
+            return 0;
+        }
+        /* The callback ignored the error so we return success */
         return 1;
     }
     if (ret == X509_PCY_TREE_FAILURE) {
@@ -3258,6 +3280,33 @@ static int check_key_level(X509_STORE_CTX *ctx, X509 *cert)
 }
 
 /*
+
+/*
+ * Check whether the public key of ``cert`` does not use explicit params
+ * for an elliptic curve.
+ *
+ * Returns 1 on success, 0 if check fails, -1 for other errors.
+ */
+static int check_curve(X509 *cert)
+{
+    EVP_PKEY *pkey = X509_get0_pubkey(cert);
+    //int ret, val;
+
+    /* Unsupported or malformed key */
+    if (pkey == NULL)
+        return -1;
+    //if (EVP_PKEY_get_id(pkey) != EVP_PKEY_EC)
+    //    return 1;
+
+    //ret =
+    //    EVP_PKEY_get_int_param(pkey,
+    //                           OSSL_PKEY_PARAM_EC_DECODED_FROM_EXPLICIT_PARAMS,
+    //                           &val);
+    //return ret == 1 ? !val : -1;
+    return 1;
+}
+
+/*-
  * Check whether the signature digest algorithm of ``cert`` meets the security
  * level of ``ctx``.  Should not be checked for trust anchors (whether
  * self-signed or otherwise).

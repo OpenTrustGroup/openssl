@@ -936,6 +936,10 @@ int PEM_read_bio_ex(BIO *bp, char **name_out, char **header,
     EVP_DecodeInit(ctx);
     BIO_get_mem_ptr(dataB, &buf_mem);
     len = buf_mem->length;
+
+    /* There was no data in the PEM file */
+    if (len == 0)
+        goto end;
     if (EVP_DecodeUpdate(ctx, (unsigned char*)buf_mem->data, &len,
                          (unsigned char*)buf_mem->data, len) < 0
             || EVP_DecodeFinal(ctx, (unsigned char*)&(buf_mem->data[len]),
@@ -946,25 +950,27 @@ int PEM_read_bio_ex(BIO *bp, char **name_out, char **header,
     len += taillen;
     buf_mem->length = len;
 
-    /* There was no data in the PEM file; avoid malloc(0). */
-    if (len == 0)
-        goto end;
     headerlen = BIO_get_mem_data(headerB, NULL);
     *header = pem_malloc(headerlen + 1, flags);
     *data = pem_malloc(len, flags);
-    if (*header == NULL || *data == NULL) {
-        pem_free(*header, flags, 0);
-        pem_free(*data, flags, 0);
-        goto end;
-    }
-    BIO_read(headerB, *header, headerlen);
+    if (*header == NULL || *data == NULL)
+        goto out_free;
+    if (headerlen != 0 && BIO_read(headerB, *header, headerlen) != headerlen)
+        goto out_free;
     (*header)[headerlen] = '\0';
-    BIO_read(dataB, *data, len);
+    if (BIO_read(dataB, *data, len) != len)
+        goto out_free;
     *len_out = len;
     *name_out = name;
     name = NULL;
     ret = 1;
+    goto end;
 
+out_free:
+    pem_free(*header, flags, 0);
+    *header = NULL;
+    pem_free(*data, flags, 0);
+    *data = NULL;
 end:
     EVP_ENCODE_CTX_free(ctx);
     pem_free(name, flags, 0);

@@ -34,11 +34,13 @@ unsigned long X509_issuer_and_serial_hash(X509 *a)
     unsigned long ret = 0;
     EVP_MD_CTX *ctx = EVP_MD_CTX_new();
     unsigned char md[16];
-    char *f;
+    char *f = NULL;
 
     if (ctx == NULL)
         goto err;
     f = X509_NAME_oneline(a->cert_info.issuer, NULL, 0);
+    if (f == NULL)
+        goto err;
     if (!EVP_DigestInit_ex(ctx, EVP_md5(), NULL))
         goto err;
     if (!EVP_DigestUpdate(ctx, (unsigned char *)f, strlen(f)))

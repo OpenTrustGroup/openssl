@@ -93,6 +93,11 @@ static int pkcs12_gen_mac(PKCS12 *p12, const char *pass, int passlen,
         return 0;
     }
 
+    if (p12->authsafes->d.data == NULL) {
+        PKCS12err(PKCS12_F_PKCS12_GEN_MAC, PKCS12_R_DECODE_ERROR);
+        return 0;
+    }
+
     salt = p12->mac->salt->data;
     saltlen = p12->mac->salt->length;
     if (!p12->mac->iter)
@@ -225,6 +230,8 @@ int PKCS12_setup_mac(PKCS12 *p12, int iter, unsigned char *salt, int saltlen,
     }
     if (!saltlen)
         saltlen = PKCS12_SALT_LEN;
+    else if (saltlen < 0)
+        return 0;
     if ((p12->mac->salt->data = OPENSSL_malloc(saltlen)) == NULL) {
         PKCS12err(PKCS12_F_PKCS12_SETUP_MAC, ERR_R_MALLOC_FAILURE);
         return 0;
