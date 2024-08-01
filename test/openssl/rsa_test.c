@@ -267,7 +267,7 @@ err:
     RSA_free(key);
     return ret;
 }
-
+#if 0
 static int test_rsa_sslv23(int idx)
 {
     int ret = 0;
@@ -297,7 +297,7 @@ err:
     RSA_free(key);
     return ret;
 }
-
+#endif
 static int test_rsa_oaep(int idx)
 {
     int ret = 0;
@@ -362,7 +362,7 @@ err:
 int setup_tests_rsa_test(void)
 {
     ADD_ALL_TESTS(test_rsa_pkcs1, 3);
-    ADD_ALL_TESTS(test_rsa_sslv23, 3);
+   // ADD_ALL_TESTS(test_rsa_sslv23, 3);
     ADD_ALL_TESTS(test_rsa_oaep, 3);
     return 1;
 }

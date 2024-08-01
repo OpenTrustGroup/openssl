@@ -23,7 +23,6 @@ int setup_tests(void)
    setup_tests_x509_check_cert_pkey("./testfile/x509-check.csr","./testfile/wrongkey.pem","req", "failed");
    run_tests("setup_tests_x509_check_cert_pkey");
    clear_all_test();
-   #if 1
    setup_tests_evp("./testfile/evpciph.txt");
    run_tests("setup_tests_evp-ciph");
    clear_all_test();
@@ -42,8 +41,6 @@ int setup_tests(void)
    setup_tests_evp("./testfile/evppkey_ecc.txt");
    run_tests("setup_tests_evp-pkeyecc");
    clear_all_test();
-#endif
-
    setup_tests_asn1_encode();
    setup_tests_asn1_internal();
    setup_tests_asn1_string_table();
@@ -86,7 +83,6 @@ int setup_tests(void)
    setup_tests_dsa_no_digest_size();
    setup_tests_dsatest();
    setup_tests_dtls_mtu();
-   //setup_tests_dtlstest("./testfile/server.pem","./testfile/server.pem");
    setup_tests_ec_internal();
    setup_tests_ecdsatest();
    setup_tests_ectest();
@@ -94,26 +90,6 @@ int setup_tests(void)
    setup_tests_errtest();
    setup_tests_exdatatest();
    setup_tests_exptest();
-#if 0
-   setup_tests_evp("./testfile/evpciph.txt");
-   run_tests("setup_tests_evp-ciph");
-   clear_all_test();
-   setup_tests_evp("./testfile/evpdigest.txt");
-   run_tests("setup_tests_evp-digest");
-   clear_all_test();
-   setup_tests_evp("./testfile/evpencod.txt");
-   run_tests("setup_tests_evp-encode");
-   clear_all_test();
-   setup_tests_evp("./testfile/evpkdf.txt");
-   run_tests("setup_tests_evp-kdf");
-   clear_all_test();
-   setup_tests_evp("./testfile/evppbe.txt");
-   run_tests("setup_tests_evp-pbe");
-   clear_all_test();
-   setup_tests_evp("./testfile/evppkey_ecc.txt");
-   run_tests("setup_tests_evp-pkeyecc");
-   clear_all_test();
-#endif
    setup_tests_fatalerrtest("./testfile/server.pem","./testfile/server.pem");
    setup_tests_gmdifftest();
    setup_tests_hmactest();

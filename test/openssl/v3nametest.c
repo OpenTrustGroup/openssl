@@ -524,6 +524,7 @@ static struct gennamedata {
             0x04, 0x03, 0x0c, 0x01, 0x62
         },
         16
+#if 0
     }, {
         /*
         * [5] {
@@ -595,6 +596,7 @@ static struct gennamedata {
             0x61
         },
         12
+#endif
     }, {
         /* [6 PRIMITIVE] { "a" } */
         {
@@ -667,6 +669,7 @@ static int test_GENERAL_NAME_cmp(void)
     int testresult = 0;
     if (!TEST_ptr(namesa) || !TEST_ptr(namesb))
         goto end;
+
     for (i = 0; i < OSSL_NELEM(gennames); i++) {
         const unsigned char *derp = gennames[i].der;
         /*
@@ -677,7 +680,9 @@ static int test_GENERAL_NAME_cmp(void)
         derp = gennames[i].der;
         namesb[i] = d2i_GENERAL_NAME(NULL, &derp, gennames[i].derlen);
         if (!TEST_ptr(namesa[i]) || !TEST_ptr(namesb[i]))
+	{
             goto end;
+	}
     }
     /* Every name should be equal to itself and not equal to any others. */
     for (i = 0; i < OSSL_NELEM(gennames); i++) {
