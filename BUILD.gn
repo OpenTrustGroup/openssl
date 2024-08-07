@@ -4,6 +4,7 @@
 
 import("//build/package.gni")
 import("//build/nebula/nbl_sdk_library.gni")
+import("BUILD.generated_tests.gni")
 
 # GRT(TODO):
 # 1. miss libssl.
@@ -11,6 +12,35 @@ import("//build/nebula/nbl_sdk_library.gni")
 
 ################################################################################
 # Public targets
+package("openssl_test") {
+    testonly = true
+    system_image = true
+    deps = [
+      ":nebula_openssl_test"
+    ]
+    tests = [
+    {
+         destdir="openssl_test"  name = "nebula_openssl_test"
+    },
+    ]
+  }
+
+executable("nebula_openssl_test") {
+    testonly = true
+    visibility = [":*"]
+    sources = openssl_test_sources  + openssl_test_support_sources
+    configs += [":openssl_test_config",":no_network"]
+    deps = [
+      "//third_party/googletest:gtest",
+    ]
+    lib_dirs = [
+    "//out/build-openssl"
+    ]
+    libs = [
+        "crypto",
+        "ssl"
+    ]
+}
 
 config("openssl_config") {
   include_dirs = [
@@ -46,6 +76,27 @@ config("crypto_config") {
   visibility = [
     ":*",
   ]
+}
+
+config("openssl_test_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "//third_party/openssl/",
+    "//out/build-openssl/include",
+    "//third_party/openssl/include",
+    "//third_party/openssl/test",
+    "//third_party/openssl/apps",
+    "//third_party/openssl/crypto/ec",
+    "///third_party/openssl/crypto/ec/curve448",
+    "//third_party/googletest/googletest/include",
+    "//zircon/trusty/lib/include/user",
+  ]
+}
+
+# When network is NOT OK, use this config.
+config("no_network") {
+  # Not test "BIOTest.SocketConnect" which depends on Network.
+  defines = ["NO_TEST_SOCKET_CONNECT"]
 }
 
 ###########################################################
